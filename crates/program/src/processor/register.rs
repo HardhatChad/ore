@@ -5,13 +5,10 @@ use solana_program::{
     program_error::ProgramError, pubkey::Pubkey, system_program,
 };
 
-use crate::{
-    instruction::RegisterArgs,
-    loaders::*,
-    state::Proof,
-    utils::AccountDeserialize,
-    utils::{create_pda, Discriminator},
-    PROOF,
+use crate::{loaders::*, utils::create_pda};
+use ore_api::{
+    consts::PROOF, instruction::RegisterArgs, state::Proof, utils::AccountDeserialize,
+    utils::Discriminator,
 };
 
 /// Register generates a new hash chain for a prospective miner. Its responsibilities include:
@@ -40,14 +37,14 @@ pub fn process_register<'a, 'info>(
         proof_info,
         &[PROOF, signer.key.as_ref()],
         args.bump,
-        &crate::id(),
+        &ore_api::id(),
     )?;
     load_program(system_program, system_program::id())?;
 
     // Initialize proof
     create_pda(
         proof_info,
-        &crate::id(),
+        &ore_api::id(),
         8 + size_of::<Proof>(),
         &[PROOF, signer.key.as_ref(), &[args.bump]],
         system_program,

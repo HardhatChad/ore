@@ -4,10 +4,10 @@ use solana_program::{
 };
 use spl_token::state::Mint;
 
-use crate::{
+use ore_api::{
+    consts::{BUS_ADDRESSES, BUS_COUNT, MINT_ADDRESS, TREASURY_ADDRESS},
     state::{Bus, Proof, Treasury},
     utils::AccountDeserialize,
-    BUS_ADDRESSES, BUS_COUNT, MINT_ADDRESS, TREASURY_ADDRESS,
 };
 
 /// Errors if:
@@ -32,7 +32,7 @@ pub fn load_bus<'a, 'info>(
     id: u64,
     is_writable: bool,
 ) -> Result<(), ProgramError> {
-    if info.owner.ne(&crate::id()) {
+    if info.owner.ne(&ore_api::id()) {
         return Err(ProgramError::InvalidAccountOwner);
     }
 
@@ -69,7 +69,7 @@ pub fn load_any_bus<'a, 'info>(
     info: &'a AccountInfo<'info>,
     is_writable: bool,
 ) -> Result<(), ProgramError> {
-    if info.owner.ne(&crate::id()) {
+    if info.owner.ne(&ore_api::id()) {
         return Err(ProgramError::InvalidAccountOwner);
     }
 
@@ -106,7 +106,7 @@ pub fn load_proof<'a, 'info>(
     authority: &Pubkey,
     is_writable: bool,
 ) -> Result<(), ProgramError> {
-    if info.owner.ne(&crate::id()) {
+    if info.owner.ne(&ore_api::id()) {
         return Err(ProgramError::InvalidAccountOwner);
     }
 
@@ -138,7 +138,7 @@ pub fn load_treasury<'a, 'info>(
     info: &'a AccountInfo<'info>,
     is_writable: bool,
 ) -> Result<(), ProgramError> {
-    if info.owner.ne(&crate::id()) {
+    if info.owner.ne(&ore_api::id()) {
         return Err(ProgramError::InvalidAccountOwner);
     }
 
@@ -339,15 +339,17 @@ mod tests {
     };
     use spl_token::state::{AccountState, Mint};
 
-    use crate::{
-        loaders::{
-            load_account, load_any_bus, load_bus, load_mint, load_proof, load_signer, load_sysvar,
-            load_token_account, load_treasury, load_uninitialized_account, load_uninitialized_pda,
+    use crate::loaders::{
+        load_account, load_any_bus, load_bus, load_mint, load_proof, load_signer, load_sysvar,
+        load_token_account, load_treasury, load_uninitialized_account, load_uninitialized_pda,
+    };
+    use ore_api::{
+        consts::{
+            BUS, BUS_ADDRESSES, BUS_COUNT, MINT_ADDRESS, PROOF, TOKEN_DECIMALS, TREASURY,
+            TREASURY_ADDRESS,
         },
         state::{Bus, Proof, Treasury},
         utils::Discriminator,
-        BUS, BUS_ADDRESSES, BUS_COUNT, MINT_ADDRESS, PROOF, TOKEN_DECIMALS, TREASURY,
-        TREASURY_ADDRESS,
     };
 
     use super::load_program;
@@ -395,7 +397,7 @@ mod tests {
         let key = Pubkey::new_unique();
         let mut lamports = 1_000_000_000;
         let mut data = [];
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -414,7 +416,7 @@ mod tests {
         let key = BUS_ADDRESSES[0];
         let mut lamports = 1_000_000_000;
         let mut data = [];
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -437,7 +439,7 @@ mod tests {
             Bus { id: 0, rewards: 0 }.to_bytes(),
         ]
         .concat();
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -460,7 +462,7 @@ mod tests {
             Bus { id: 1, rewards: 0 }.to_bytes(),
         ]
         .concat();
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -483,7 +485,7 @@ mod tests {
             Bus { id: 0, rewards: 0 }.to_bytes(),
         ]
         .concat();
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -521,7 +523,7 @@ mod tests {
         let key = Pubkey::new_unique();
         let mut lamports = 1_000_000_000;
         let mut data = [];
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -540,7 +542,7 @@ mod tests {
         let key = BUS_ADDRESSES[0];
         let mut lamports = 1_000_000_000;
         let mut data = [];
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -563,7 +565,7 @@ mod tests {
             Bus { id: 0, rewards: 0 }.to_bytes(),
         ]
         .concat();
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -590,7 +592,7 @@ mod tests {
             .to_bytes(),
         ]
         .concat();
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -617,7 +619,7 @@ mod tests {
             .to_bytes(),
         ]
         .concat();
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -640,7 +642,7 @@ mod tests {
             Bus { id: 0, rewards: 0 }.to_bytes(),
         ]
         .concat();
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -657,7 +659,7 @@ mod tests {
     #[test]
     pub fn test_load_proof_bad_account_owner() {
         let authority = Pubkey::new_unique();
-        let pda = Pubkey::find_program_address(&[PROOF, authority.as_ref()], &crate::id());
+        let pda = Pubkey::find_program_address(&[PROOF, authority.as_ref()], &ore_api::id());
         let mut lamports = 1_000_000_000;
         let mut data = [];
         let owner = system_program::id();
@@ -679,7 +681,7 @@ mod tests {
         let key = Pubkey::new_unique();
         let mut lamports = 1_000_000_000;
         let mut data = [];
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -696,10 +698,10 @@ mod tests {
     #[test]
     pub fn test_load_proof_empty_data() {
         let authority = Pubkey::new_unique();
-        let pda = Pubkey::find_program_address(&[PROOF, authority.as_ref()], &crate::id());
+        let pda = Pubkey::find_program_address(&[PROOF, authority.as_ref()], &ore_api::id());
         let mut lamports = 1_000_000_000;
         let mut data = [];
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &pda.0,
             false,
@@ -716,7 +718,7 @@ mod tests {
     #[test]
     pub fn test_load_proof_bad_data() {
         let authority = Pubkey::new_unique();
-        let pda = Pubkey::find_program_address(&[PROOF, authority.as_ref()], &crate::id());
+        let pda = Pubkey::find_program_address(&[PROOF, authority.as_ref()], &ore_api::id());
         let mut lamports = 1_000_000_000;
         let mut data = [
             &(Bus::discriminator() as u64).to_le_bytes(), // Bus discriminator
@@ -730,7 +732,7 @@ mod tests {
             .to_bytes(),
         ]
         .concat();
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &pda.0,
             false,
@@ -747,7 +749,7 @@ mod tests {
     #[test]
     pub fn test_load_proof_not_writeable() {
         let authority = Pubkey::new_unique();
-        let pda = Pubkey::find_program_address(&[PROOF, authority.as_ref()], &crate::id());
+        let pda = Pubkey::find_program_address(&[PROOF, authority.as_ref()], &ore_api::id());
         let mut lamports = 1_000_000_000;
         let mut data = [
             &(Proof::discriminator() as u64).to_le_bytes(),
@@ -761,7 +763,7 @@ mod tests {
             .to_bytes(),
         ]
         .concat();
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &pda.0,
             false,
@@ -777,7 +779,7 @@ mod tests {
 
     #[test]
     pub fn test_load_treasury_bad_account_owner() {
-        let pda = Pubkey::find_program_address(&[TREASURY], &crate::id());
+        let pda = Pubkey::find_program_address(&[TREASURY], &ore_api::id());
         let mut lamports = 1_000_000_000;
         let mut data = [];
         let owner = system_program::id();
@@ -799,7 +801,7 @@ mod tests {
         let key = Pubkey::new_unique();
         let mut lamports = 1_000_000_000;
         let mut data = [];
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -818,7 +820,7 @@ mod tests {
         let key = TREASURY_ADDRESS;
         let mut lamports = 1_000_000_000;
         let mut data = [];
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &key,
             false,
@@ -834,7 +836,7 @@ mod tests {
 
     #[test]
     pub fn test_load_treasury_bad_data() {
-        let pda = Pubkey::find_program_address(&[TREASURY], &crate::id());
+        let pda = Pubkey::find_program_address(&[TREASURY], &ore_api::id());
         let mut lamports = 1_000_000_000;
         let mut data = [
             &(Bus::discriminator() as u64).to_le_bytes(), // Bus discriminator
@@ -849,7 +851,7 @@ mod tests {
             .to_bytes(),
         ]
         .concat();
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &pda.0,
             false,
@@ -865,7 +867,7 @@ mod tests {
 
     #[test]
     pub fn test_load_treasury_not_writeable() {
-        let pda = Pubkey::find_program_address(&[TREASURY], &crate::id());
+        let pda = Pubkey::find_program_address(&[TREASURY], &ore_api::id());
         let mut lamports = 1_000_000_000;
         let mut data = [
             &(Treasury::discriminator() as u64).to_le_bytes(),
@@ -880,7 +882,7 @@ mod tests {
             .to_bytes(),
         ]
         .concat();
-        let owner = crate::id();
+        let owner = ore_api::id();
         let info = AccountInfo::new(
             &pda.0,
             false,
@@ -1099,7 +1101,7 @@ mod tests {
 
     #[test]
     pub fn test_load_uninitialized_pda_bad_key_bump() {
-        let pda = Pubkey::find_program_address(&[TREASURY], &crate::id());
+        let pda = Pubkey::find_program_address(&[TREASURY], &ore_api::id());
         let mut lamports = 1_000_000_000;
         let mut data = [];
         let owner = system_program::id();
@@ -1113,8 +1115,8 @@ mod tests {
             false,
             0,
         );
-        assert!(load_uninitialized_pda(&info, &[BUS], pda.1, &crate::id()).is_err());
-        assert!(load_uninitialized_pda(&info, &[TREASURY], 0, &crate::id()).is_err());
+        assert!(load_uninitialized_pda(&info, &[BUS], pda.1, &ore_api::id()).is_err());
+        assert!(load_uninitialized_pda(&info, &[TREASURY], 0, &ore_api::id()).is_err());
     }
 
     #[test]

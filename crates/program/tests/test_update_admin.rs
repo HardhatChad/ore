@@ -1,7 +1,6 @@
-use ore::{state::Treasury, utils::AccountDeserialize, TREASURY_ADDRESS};
+use ore_api::{consts::TREASURY_ADDRESS, state::Treasury, utils::AccountDeserialize};
 use solana_program::{
-    hash::Hash, keccak::Hash as KeccakHash, native_token::LAMPORTS_PER_SOL, rent::Rent,
-    system_program,
+    hash::Hash, native_token::LAMPORTS_PER_SOL, pubkey::Pubkey, rent::Rent, system_program,
 };
 use solana_program_test::{processor, read_file, BanksClient, ProgramTest};
 use solana_sdk::{
@@ -11,12 +10,12 @@ use solana_sdk::{
 };
 
 #[tokio::test]
-async fn test_update_difficulty() {
+async fn test_update_admin() {
     // Setup
     let (mut banks, payer, _, blockhash) = setup_program_test_env().await;
 
     // Submit tx
-    let ix = ore::instruction::initialize(payer.pubkey());
+    let ix = ore_api::instruction::initialize(payer.pubkey());
     let tx = Transaction::new_signed_with_payer(&[ix], Some(&payer.pubkey()), &[&payer], blockhash);
     let res = banks.process_transaction(tx).await;
     assert!(res.is_ok());
@@ -25,9 +24,9 @@ async fn test_update_difficulty() {
     let treasury_account = banks.get_account(TREASURY_ADDRESS).await.unwrap().unwrap();
     let treasury = Treasury::try_from_bytes(&treasury_account.data).unwrap();
 
-    // Submit update difficulty ix
-    let new_difficulty = KeccakHash::new_unique();
-    let ix = ore::instruction::update_difficulty(payer.pubkey(), new_difficulty.into());
+    // Submit update admin ix
+    let new_admin = Pubkey::new_unique();
+    let ix = ore_api::instruction::update_admin(payer.pubkey(), new_admin);
     let tx = Transaction::new_signed_with_payer(&[ix], Some(&payer.pubkey()), &[&payer], blockhash);
     let res = banks.process_transaction(tx).await;
     assert!(res.is_ok());
@@ -36,30 +35,35 @@ async fn test_update_difficulty() {
     let treasury_account = banks.get_account(TREASURY_ADDRESS).await.unwrap().unwrap();
     let treasury_ = Treasury::try_from_bytes(&treasury_account.data).unwrap();
     assert_eq!(treasury_.bump, treasury.bump);
-    assert_eq!(treasury_.admin, treasury.admin);
-    assert_eq!(treasury_.difficulty, new_difficulty.into());
+    assert_eq!(treasury_.admin, new_admin);
+    assert_eq!(treasury_.difficulty, treasury.difficulty);
     assert_eq!(treasury_.last_reset_at, treasury.last_reset_at);
     assert_eq!(treasury_.reward_rate, treasury.reward_rate);
     assert_eq!(
         treasury_.total_claimed_rewards,
         treasury.total_claimed_rewards
     );
+
+    // Submit another update admin ix
+    let ix = ore_api::instruction::update_admin(payer.pubkey(), payer.pubkey());
+    let tx = Transaction::new_signed_with_payer(&[ix], Some(&payer.pubkey()), &[&payer], blockhash);
+    let res = banks.process_transaction(tx).await;
+    assert!(res.is_err());
 }
 
 #[tokio::test]
-async fn test_update_difficulty_bad_signer() {
+async fn test_update_admin_bad_signer() {
     // Setup
     let (mut banks, payer, alt_payer, blockhash) = setup_program_test_env().await;
 
     // Submit tx
-    let ix = ore::instruction::initialize(payer.pubkey());
+    let ix = ore_api::instruction::initialize(payer.pubkey());
     let tx = Transaction::new_signed_with_payer(&[ix], Some(&payer.pubkey()), &[&payer], blockhash);
     let res = banks.process_transaction(tx).await;
     assert!(res.is_ok());
 
-    // Submit update difficulty ix
-    let new_difficulty = KeccakHash::new_unique();
-    let ix = ore::instruction::update_difficulty(alt_payer.pubkey(), new_difficulty.into());
+    // Submit ix
+    let ix = ore_api::instruction::update_admin(alt_payer.pubkey(), Pubkey::new_unique());
     let tx = Transaction::new_signed_with_payer(
         &[ix],
         Some(&alt_payer.pubkey()),
@@ -71,19 +75,18 @@ async fn test_update_difficulty_bad_signer() {
 }
 
 #[tokio::test]
-async fn test_update_difficulty_not_enough_accounts() {
+async fn test_update_admin_not_enough_accounts() {
     // Setup
     let (mut banks, payer, _, blockhash) = setup_program_test_env().await;
 
     // Submit tx
-    let ix = ore::instruction::initialize(payer.pubkey());
+    let ix = ore_api::instruction::initialize(payer.pubkey());
     let tx = Transaction::new_signed_with_payer(&[ix], Some(&payer.pubkey()), &[&payer], blockhash);
     let res = banks.process_transaction(tx).await;
     assert!(res.is_ok());
 
     // Submit ix without enough accounts
-    let new_difficulty = KeccakHash::new_unique();
-    let mut ix = ore::instruction::update_difficulty(payer.pubkey(), new_difficulty.into());
+    let mut ix = ore_api::instruction::update_admin(payer.pubkey(), Pubkey::new_unique());
     ix.accounts.remove(1);
     let tx = Transaction::new_signed_with_payer(&[ix], Some(&payer.pubkey()), &[&payer], blockhash);
     let res = banks.process_transaction(tx).await;
@@ -91,7 +94,8 @@ async fn test_update_difficulty_not_enough_accounts() {
 }
 
 async fn setup_program_test_env() -> (BanksClient, Keypair, Keypair, Hash) {
-    let mut program_test = ProgramTest::new("ore", ore::ID, processor!(ore::process_instruction));
+    let mut program_test =
+        ProgramTest::new("ore", ore_api::ID, processor!(ore::process_instruction));
     program_test.prefer_bpf(true);
 
     // Setup metadata program

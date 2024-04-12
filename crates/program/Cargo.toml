@@ -1,0 +1,33 @@
+[package]
+name = "ore-program"
+version = "1.2.0"
+description = "Ore is a digital currency you can mine from anywhere, at home or on your phone."
+edition.workspace = true
+license.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+repository.workspace = true
+readme.workspace = true
+keywords.workspace = true
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "ore"
+
+[features]
+no-entrypoint = []
+default = []
+
+[dependencies]
+mpl-token-metadata.workspace = true
+ore-api = { path = "../api", version = "1.0.0" }
+solana-program.workspace = true
+spl-token.workspace = true
+spl-associated-token-account.workspace = true
+
+[dev-dependencies]
+bs64 = "0.1.2"
+rand = "0.8.5"
+solana-program-test = "^1.16"
+solana-sdk = "^1.16"
+tokio = { version = "1.35", features = ["full"] }

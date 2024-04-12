@@ -1,20 +1,13 @@
-pub mod consts;
-pub mod error;
-pub mod instruction;
 mod loaders;
 mod processor;
-pub mod state;
-pub mod utils;
+mod utils;
 
-pub use consts::*;
-use instruction::*;
+use ore_api::instruction::OreInstruction;
 use processor::*;
 use solana_program::{
-    self, account_info::AccountInfo, declare_id, entrypoint::ProgramResult,
-    program_error::ProgramError, pubkey::Pubkey,
+    self, account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+    pubkey::Pubkey,
 };
-
-declare_id!("mineRHF5r6S7HyD9SppBfVMXMavDkJsxwGesEvxZr2A");
 
 #[cfg(not(feature = "no-entrypoint"))]
 solana_program::entrypoint!(process_instruction);
@@ -24,7 +17,7 @@ pub fn process_instruction(
     accounts: &[AccountInfo],
     data: &[u8],
 ) -> ProgramResult {
-    if program_id.ne(&crate::id()) {
+    if program_id.ne(&ore_api::id()) {
         return Err(ProgramError::IncorrectProgramId);
     }
 
