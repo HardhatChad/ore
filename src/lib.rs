@@ -15,7 +15,7 @@ use solana_program::{
 };
 
 // declare_id!("oreFHcE6FvJTrsfaYca4mVeZn7J7T6oZS9FAvW9eg4q");
-declare_id!("8dXTtw88a14ar6eKdaQz5tiFSzkSayAc8zwQpBLqa5SU");
+declare_id!("8uxpjt4KWFcP6pHRW3FkKtJw6YxaHpqZU7Myy2b9K3n");
 
 #[cfg(not(feature = "no-entrypoint"))]
 solana_program::entrypoint!(process_instruction);

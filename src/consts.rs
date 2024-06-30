@@ -6,7 +6,8 @@ use solana_program::{pubkey, pubkey::Pubkey};
 pub const INITIAL_BASE_REWARD_RATE: u64 = 10u64.pow(3u32);
 
 /// The admin allowed to initialize the program.
-pub const INITIAL_ADMIN: Pubkey = pubkey!("HBUh9g46wk2X89CvaNN15UmsznP59rh6od1h8JwYAopk");
+// pub const INITIAL_ADMIN: Pubkey = pubkey!("HBUh9g46wk2X89CvaNN15UmsznP59rh6od1h8JwYAopk");
+pub const INITIAL_ADMIN: Pubkey = pubkey!("DEuG4JnzvMVxMFPoBVvf2GH38mn3ybunMxtfmVU3ms86");
 
 /// The spam/liveness tolerance in seconds.
 pub const TOLERANCE: i64 = 5;
