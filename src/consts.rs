@@ -129,7 +129,8 @@ pub const MINT_ADDRESS: Pubkey =
     Pubkey::new_from_array(ed25519::derive_program_address(&[MINT, &MINT_NOISE], &PROGRAM_ID).0);
 
 /// The address of the v1 mint account.
-pub const MINT_V1_ADDRESS: Pubkey = pubkey!("oreoN2tQbHXVaZsr3pf66A48miqcBXCDJozganhEJgz");
+// pub const MINT_V1_ADDRESS: Pubkey = pubkey!("oreoN2tQbHXVaZsr3pf66A48miqcBXCDJozganhEJgz");
+pub const MINT_V1_ADDRESS: Pubkey = pubkey!("2Hr9iaAd7a5q9V4XmLHPBtSZcfhff8RBrvaG6zf2bEae");
 
 /// The address of the treasury account.
 pub const TREASURY_ADDRESS: Pubkey =
